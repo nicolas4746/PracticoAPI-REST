@@ -1,0 +1,19 @@
+{
+  "name": "practicoapi-rest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nicolas4746/PracticoAPI-REST.git"
+  },
+  "author": "Nicolas Goitia nicolasgoitia10@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nicolas4746/PracticoAPI-REST/issues"
+  },
+  "homepage": "https://github.com/nicolas4746/PracticoAPI-REST#readme"
+}
