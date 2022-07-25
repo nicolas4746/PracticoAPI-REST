@@ -225,7 +225,7 @@ button {
 }
 
 .category-title::before {
-  content: '••••';
+  content: '••••'; 
   color: transparent;
   /* TODO: cambiar color por ID de la categoría */
   background-color: var(--idColor);
@@ -340,7 +340,7 @@ button {
   max-height: 187.5px;
 }
   
- 
+
 /* Footer */
 footer {
   background-color: var(--purple-medium-3);

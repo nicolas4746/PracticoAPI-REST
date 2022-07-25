@@ -15,6 +15,7 @@ async function getTrendingMoviesPreview() {
         
         const movieImg = document.createElement('img');
         movieImg.classList.add('movie-img');
+
         movieImg.setAttribute('alt', movie.title);
         movieImg.setAttribute(
             'src',
@@ -25,4 +26,31 @@ async function getTrendingMoviesPreview() {
         trendingPreviewMoviesContainer.appendChild(movieContainer);
     });
 };
+
+async function getCategoriesPreview() {
+    const res = await fetch('https://api.themoviedb.org/3/genre/movie/list?api_key='+ API_KEY +'&language=es');
+    const data = await res.json();
+
+    const categories = data.genres;
+
+    categories.forEach(category =>{
+        const previewCategoriesContainer = document.querySelector(
+            '#categoriesPreview .categoriesPreview-list'
+        );
+        const categoryContainer = document.createElement('div');
+        categoryContainer.classList.add('category-container');
+
+        const categoryTitle = document.createElement('h3');
+        categoryTitle.classList.add('category-title');
+        
+        categoryTitle.setAttribute('id', 'id' + category.id);/* se concatena is,solo porque esta asi en el css => por ej #id28*/
+        const categoryTitleText = document.createTextNode(category.name);
+
+        categoryTitle.appendChild(categoryTitleText);
+        categoryContainer.appendChild(categoryTitle);
+        previewCategoriesContainer.appendChild(categoryContainer);
+    });
+};
+
 getTrendingMoviesPreview();
+getCategoriesPreview();
