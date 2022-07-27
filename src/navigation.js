@@ -60,6 +60,15 @@ function categoriesPage() {
     categoriesPreviewSection.classList.add('inactive');
     genericSection.classList.remove('inactive');
     movieDetailSection.classList.add('inactive');
+
+    const [_, categoryData] = location.hash.split('=');//=>['#category','id-name']=>#category=id-name(hash original) ---- [_,nombre de variable directamente] _ no necesitamos el primer valor 
+    let [categoryId, categoryName] = categoryData.split('-');
+    
+    categoryName = categoryName.split('%20');// los espacios en las url los codifican %20,con slpit
+    categoryName = categoryName.join(' '); //lo separamos,los unimos con join dandole el espacio(' ')
+    
+    headerCategoryTitle.innerHTML = categoryName;
+    getMoviesByCategory(categoryId);
 }
 function movieDetailsPage() {
     console.log('MOVIE!!!');
