@@ -9,7 +9,16 @@ const api = axios.create({
 });
 
 //utils=funciones para reutilizar codigo
-function createMovies(movies, container) {
+const lazyLoader = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if(entry.isIntersecting){
+            const url = entry.target.getAttribute('data-img')
+            entry.target.setAttribute('src', url)
+        }
+    });
+});
+
+function createMovies(movies, container, lazyLoad = false) {
     container.innerHTML = ''; //para que no se dupliquen los elementos al volver al home
     movies.forEach(movie =>{
         const movieContainer = document.createElement('div');
@@ -23,9 +32,20 @@ function createMovies(movies, container) {
 
         movieImg.setAttribute('alt', movie.title);
         movieImg.setAttribute(
-            'src',
+            lazyLoad ? 'data-img' : 'src',
             'https://image.tmdb.org/t/p/w300' + movie.poster_path
         );
+
+        movieImg.addEventListener('error', () => {
+            movieImg.setAttribute(
+                'src', 
+                'https://via.placeholder.com/300x450/ffffff/000000/?text=Pelicula+no+disponible'
+            );
+        });
+
+        if(lazyLoad){
+            lazyLoader.observe(movieImg);
+        }
 
         movieContainer.appendChild(movieImg);
         container.appendChild(movieContainer);
@@ -58,7 +78,7 @@ function createCategories(categories, container){
 async function getTrendingMoviesPreview() {
     const {data} = await api('trending/movie/day');
     const movies = data.results;
-    createMovies(movies, trendingMoviesPreviewList);
+    createMovies(movies, trendingMoviesPreviewList, true);
 };
 
 async function getCategoriesPreview() {
@@ -74,7 +94,7 @@ async function getMoviesByCategory(id) {
         }
     });
     const movies = data.results;
-    createMovies(movies, genericSection);
+    createMovies(movies, genericSection, true);
 };
 
 async function getMovieBySearch(querySearch) {
