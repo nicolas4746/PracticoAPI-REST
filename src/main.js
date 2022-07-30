@@ -18,9 +18,19 @@ const lazyLoader = new IntersectionObserver((entries) => {
     });
 });
 
-function createMovies(movies, container, lazyLoad = false) {
-    container.innerHTML = ''; //para que no se dupliquen los elementos al volver al home
-    movies.forEach(movie =>{
+function createMovies(
+    movies,
+    container,
+    {
+    lazyLoad = false,
+    clean =  true,
+    } = {},// el igual objeto es para cuando no le enviamos nada o 1 sola propiedad, siga funcionando.
+    ) {
+        if (clean){  
+        container.innerHTML = ''; //para que no se dupliquen los elementos al volver al home
+        }
+
+        movies.forEach(movie =>{
         const movieContainer = document.createElement('div');
         movieContainer.classList.add('movie-container');
         movieContainer.addEventListener('click', () => {
@@ -94,8 +104,42 @@ async function getMoviesByCategory(id) {
         }
     });
     const movies = data.results;
-    createMovies(movies, genericSection, true);
+    maxPage = data.total_pages;
+    createMovies(
+        movies,
+        genericSection, 
+        { lazyLoad: true,}
+        );
 };
+
+function getPaginatedMoviesByCategory(id) {
+    return async function () {
+        const {
+            scrollTop, 
+            scrollHeight, 
+            clientHeight 
+        } = document.documentElement;
+    
+        const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight - 15); 
+        // se le resta 15 pixeles para que no sea necesario llegar hasta abajo totalmente.
+        const pageIsNotMax = page < maxPage;
+        if(scrollIsBottom && pageIsNotMax){
+            page++;
+            const {data} = await api('discover/movie', {
+                params:{
+                    with_genres: id,
+                    page,
+                },
+            });
+            const movies = data.results;
+            createMovies(
+                movies,
+                genericSection, 
+                { lazyLoad: true, clean:false }
+                );
+        }
+    }
+}
 
 async function getMovieBySearch(querySearch) {
     const {data} = await api('search/movie', {
@@ -104,14 +148,82 @@ async function getMovieBySearch(querySearch) {
         }
     });
     const movies = data.results;
+    maxPage = data.total_pages;
+    console.log(maxPage)
+    console.log(page)
     createMovies(movies, genericSection);
 };
+
+function getPaginatedMoviesBySearch(querySearch) {
+    return async function () {
+        const {
+            scrollTop, 
+            scrollHeight, 
+            clientHeight 
+        } = document.documentElement;
+    
+        const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight - 15); 
+        // se le resta 15 pixeles para que no sea necesario llegar hasta abajo totalmente.
+        const pageIsNotMax = page < maxPage;
+    
+        if(scrollIsBottom && pageIsNotMax){
+            page++;
+            const {data} = await api('search/movie', {
+                params:{
+                    query: querySearch,
+                    page,
+                }
+            });
+            const movies = data.results;
+            createMovies(
+                movies,
+                genericSection,
+                { lazyLoad: true, clean:false },
+            );
+        }
+    }
+}
 
 async function getTrendingMovies() {
     const {data} = await api('trending/movie/day');
     const movies = data.results;
-    createMovies(movies, genericSection);
+    maxPage = data.total_pages;
+
+    createMovies(movies, genericSection, { lazyLoad: true, clean:true });
+
+    /* const btnLoadMore = document.createElement('button');
+    btnLoadMore.innerHTML = 'Cargar mas';
+    btnLoadMore.addEventListener('click', getPaginatedTrendingMovies);
+    genericSection.appendChild(btnLoadMore); */
 };
+
+async function getPaginatedTrendingMovies() {
+    const {
+        scrollTop, 
+        scrollHeight, 
+        clientHeight 
+    } = document.documentElement;
+
+    const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight - 15); 
+    // se le resta 15 pixeles para que no sea necesario llegar hasta abajo totalmente.
+    const pageIsNotMax = page < maxPage;
+
+
+    if(scrollIsBottom && pageIsNotMax){
+        page++;
+        const {data} = await api('trending/movie/day', {
+            params:{
+                page,
+            }
+        });
+        const movies = data.results;
+        createMovies(movies, genericSection, { lazyLoad: true, clean:false });
+    }
+    /* const btnLoadMore = document.createElement('button');
+    btnLoadMore.innerHTML = 'Cargar mas';
+    btnLoadMore.addEventListener('click', getPaginatedTrendingMovies);
+    genericSection.appendChild(btnLoadMore); */
+}
 
 async function getMovieById(id) {
     const {data:movie} = await api(`movie/${id}`);

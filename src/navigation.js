@@ -1,3 +1,7 @@
+let maxPage;
+let page = 1;
+let infiniteScroll;
+
 searchFormBtn.addEventListener('click', () => {
     location.hash = '#search=' + searchFormInput.value;
 });
@@ -11,9 +15,15 @@ arrowBtn.addEventListener('click', () => {
 
 window.addEventListener('DOMContentLoaded', navigator, false);
 window.addEventListener('hashchange', navigator, false);
-
+window.addEventListener('scroll', infiniteScroll, false);
+//el passive:false llama a preventDefault(), algunos navegadores lo tienen en true por defecto.
 function navigator() {
     console.log('navigation');
+
+    if( infiniteScroll ) {
+        window.removeEventListener('scroll', infiniteScroll, {passive: false});
+        infiniteScroll = undefined;
+    }
 
     if(location.hash.startsWith('#trends')) {
         trendsPage()
@@ -28,7 +38,11 @@ function navigator() {
     }
 
     document.documentElement.scrollTop = 0;// las 2 hacen lo mismo pero en distintos navegadores.
-    document.body.scrollTop = 0;
+    document.body.scrollTop = 0;// Esto es para iniciar la pag arriba.
+
+    if (infiniteScroll) {
+        window.addEventListener('scroll', infiniteScroll,  {passive: false});
+    }
 };
 
 function homePage() {
@@ -73,6 +87,8 @@ function categoriesPage() {
     
     headerCategoryTitle.innerHTML = categoryName;
     getMoviesByCategory(categoryId);
+
+    infiniteScroll = getPaginatedMoviesByCategory(categoryId); 
 }
 function movieDetailsPage() {
     console.log('MOVIE!!!');
@@ -111,7 +127,11 @@ function searchPage() {
     // ['#search', 'loQueBuscaron']
     const [_, querySearch] = location.hash.split('=');
     getMovieBySearch(querySearch);
+
+    infiniteScroll = getPaginatedMoviesBySearch(querySearch); 
+    /* Si bien aca le pasamos un parametro, la funcion no se va a ejecutar, ya que usamos un closure que recibe una funcion async. Por lo tanto no va a ejecutar la funcion ahora sino en el evento Scroll como queremos. */
 }
+
 function trendsPage() {
     console.log('TRENDS!!!');
 
@@ -129,4 +149,6 @@ function trendsPage() {
     
     headerCategoryTitle.innerHTML = 'Tendencias';
     getTrendingMovies();
+
+    infiniteScroll = getPaginatedTrendingMovies;
 }
